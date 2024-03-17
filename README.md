@@ -28,4 +28,4 @@ Features
 # Setup Instructions
 
 1. Clone the Repository through CMD:
-git clone https://github.com/your-username/virtual-assistant-invoice-system.git
+git clone (our github link)
