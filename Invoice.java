@@ -1,67 +1,72 @@
-public class Invoice {
+import java.sql.*;
+import java.util.Scanner;
+import java.sql.Statement;
+import static java.sql.DriverManager.getConnection;
 
-        private int invoice_id;
-        private int client_id;
-        private String date;
-        private double total_amount;
-        private String status;
-    
-        public Invoice(int invoice_id, int client_id, String date, double total_amount, String status) {
-            this.invoice_id = invoice_id;
-            this.client_id = client_id;
-            this.date = date;
-            this.total_amount = total_amount;
-            this.status = status;
+public class Invoice {
+    static Scanner inputScanner = new Scanner(System.in);
+
+    public static String getMostFrequentService(Connection conn) {
+        String mostFrequentService = null;
+        String sqlQuery = "SELECT service_name, COUNT(*) AS service_count " +
+                          "FROM services " +
+                          "GROUP BY service_name " +
+                          "ORDER BY service_count DESC " +
+                          "LIMIT 1";
+
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sqlQuery)) {
+
+            if (rs.next()) {
+                mostFrequentService = rs.getString("service_name");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    
-        public int getInvoiceId() {
-            return invoice_id;
-        }
-    
-        public void setInvoiceId(int invoice_id) {
-            this.invoice_id = invoice_id;
-        }
-    
-        public int getClientId() {
-            return client_id;
-        }
-    
-        public void setClientId(int client_id) {
-            this.client_id = client_id;
-        }
-    
-        public String getDate() {
-            return date;
-        }
-    
-        public void setDate(String date) {
-            this.date = date;
-        }
-    
-        public double getTotalAmount() {
-            return total_amount;
-        }
-    
-        public void setTotalAmount(double total_amount) {
-            this.total_amount = total_amount;
-        }
-    
-        public String getStatus() {
-            return status;
-        }
-    
-        public void setStatus(String status) {
-            this.status = status;
-        }
-    
-        @Override
-        public String toString() {
-            return "Invoice{" +
-                    "invoiceId=" + invoice_id +
-                    ", clientId=" + client_id +
-                    ", date='" + date + '\'' +
-                    ", totalAmount=" + total_amount +
-                    ", status='" + status + '\'' +
-                    '}';
-        }
+
+        return mostFrequentService;
     }
+
+    public static String getClientWithMostOrders(Connection conn) {
+        String clientWithMostOrders = null;
+        String sqlQuery = "SELECT c.client_id, c.client_name, COUNT(ii.service_id) AS order_count " +
+                          "FROM clients c " +
+                          "LEFT JOIN invoice_items ii ON c.client_id = ii.client_id " +
+                          "GROUP BY c.client_id, c.client_name " +
+                          "ORDER BY order_count DESC " +
+                          "LIMIT 1";
+
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sqlQuery)) {
+
+            if (rs.next()) {
+                int clientId = rs.getInt("client_id");
+                String clientName = rs.getString("client_name");
+                clientWithMostOrders = clientName + " - Client ID: "+ clientId;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return clientWithMostOrders;
+    }
+
+    public static int calculateWeeklyRevenue(Connection conn) {
+        int weeklyRevenue = 0;
+        String sqlQuery = "SELECT SUM(subtotal) AS totalRevenue " +
+                          "FROM invoice_items " +
+                          "WHERE date >= DATE_SUB(CURDATE(), INTERVAL 1 WEEK)";
+
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sqlQuery)) {
+
+            if (rs.next()) {
+                weeklyRevenue = rs.getInt("totalRevenue");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return weeklyRevenue;
+    }
+}

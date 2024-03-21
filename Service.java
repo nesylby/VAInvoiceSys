@@ -1,46 +1,38 @@
+import java.sql.*;
+import java.util.Scanner;
+import java.sql.Statement;
+import static java.sql.DriverManager.getConnection;
 public class Service {
+    static Scanner inputScanner = new Scanner(System.in);
 
-        private int service_id;
-        private String service_name;
-        private double hourly_rate;
-    
-        public Service(int service_id, String service_name, double hourly_rate) {
-            this.service_id = service_id;
-            this.service_name = service_name;
-            this.hourly_rate = hourly_rate;
-        }
-    
-        public int getServiceId() {
-            return service_id;
-        }
-    
-        public void setServiceId(int service_id) {
-            this.service_id = service_id;
-        }
-    
-        public String getServiceName() {
-            return service_name;
-        }
-    
-        public void setServiceName(String service_name) {
-            this.service_name = service_name;
-        }
-    
-        public double getHourlyRate() {
-            return hourly_rate;
-        }
-    
-        public void setHourlyRate(double hourly_rate) {
-            this.hourly_rate = hourly_rate;
-        }
-    
-        @Override
-        public String toString() {
-            return "Service{" +
-                    "serviceId=" + service_id +
-                    ", serviceName='" + service_name + '\'' +
-                    ", hourlyRate=" + hourly_rate +
-                    '}';
+    public static void fetchLastAddedClientID(Connection conn) {
+        String sqlQuery = "SELECT client_id FROM clients ORDER BY client_id DESC LIMIT 1";
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sqlQuery)) {
+            if (rs.next()) {
+                int clientId = rs.getInt("client_id");
+                System.out.println("Last added client ID: " + clientId);
+                System.out.println("");
+            } else {
+                System.out.println("No clients found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
-    
+
+    public static void fetchLastAddedServiceID(Connection conn) {
+        String sqlQuery = "SELECT service_id FROM services ORDER BY service_id DESC LIMIT 1";
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sqlQuery)) {
+            if (rs.next()) {
+                int serviceId = rs.getInt("service_id");
+                System.out.println("Last added service ID: " + serviceId);
+            } else {
+                System.out.println("No services found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
